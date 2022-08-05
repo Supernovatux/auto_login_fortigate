@@ -1,7 +1,9 @@
 use std::io;
 use std::io::prelude::*;
 pub mod get_pass;
+pub mod login;
 pub mod setup_chrome_driver;
+pub mod warp_control;
 
 pub fn pause() {
     let mut stdin = io::stdin();
