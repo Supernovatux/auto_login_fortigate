@@ -5,7 +5,7 @@ async fn main() -> WebDriverResult<()> {
     if !auto_login::warp_control::chck_warp() {
         auto_login::warp_control::warpctl(auto_login::warp_control::WarpModes::Stop);
         web_status = auto_login::login::login(
-            auto_login::get_pass::get_pass("/home/thulashitharan/.config/pass").await,
+            auto_login::get_pass::get_pass(&auto_login::cli_parser::get_path().await).await,
         )
         .await;
         auto_login::warp_control::warpctl(auto_login::warp_control::WarpModes::Start);

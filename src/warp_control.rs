@@ -1,4 +1,4 @@
-use curl::easy::Easy;
+use curl::easy::{Easy, SslOpt};
 use std::ffi::OsStr;
 pub enum WarpModes {
     Start,
@@ -7,18 +7,26 @@ pub enum WarpModes {
 pub fn chck_warp() -> bool {
     let mut data = Vec::new();
     let mut handle = Easy::new();
+    let mut ssl_opts = SslOpt::new();
+    ssl_opts.no_revoke(true);
+    ssl_opts.allow_beast(true);
+    handle.ssl_options(&ssl_opts).unwrap();
     handle
         .url("https://www.cloudflare.com/cdn-cgi/trace")
         .unwrap();
     {
         let mut transfer = handle.transfer();
-        transfer
+        if transfer
             .write_function(|new_data| {
                 data.extend_from_slice(new_data);
                 Ok(new_data.len())
             })
-            .unwrap();
-        transfer.perform().unwrap();
+            .err().is_some() {
+                return false;
+            }
+        if transfer.perform().err().is_some() {
+            return false;
+        }
     }
 
     // Convert it to `String`
@@ -30,11 +38,10 @@ pub fn chck_warp() -> bool {
     }
 }
 pub fn warpctl(mode: WarpModes) {
-    let output = std::process::Command::new("warp-cli")
+    std::process::Command::new("warp-cli")
         .arg(mode)
         .output()
         .unwrap();
-    dbg!(output);
 }
 impl AsRef<OsStr> for WarpModes {
     fn as_ref(&self) -> &OsStr {

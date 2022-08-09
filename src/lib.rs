@@ -1,5 +1,6 @@
 use std::io;
 use std::io::prelude::*;
+pub mod cli_parser;
 pub mod get_pass;
 pub mod login;
 pub mod setup_chrome_driver;

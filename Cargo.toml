@@ -22,3 +22,4 @@ strip = true
 thirtyfour="*"
 tokio = { version = "*", features = ["full"] }
 curl = "*"
+clap = { version = "3.2.16", features = ["derive"] }
