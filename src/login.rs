@@ -1,18 +1,20 @@
-use std::future::Future;
-
 use thirtyfour::prelude::*;
-pub async fn login(secrets: impl Future<Output = Option<crate::get_pass::Secret>>) -> bool {
-    match login_int(secrets).await {
+pub async fn login(secrets: Option<crate::get_pass::Secret>) -> bool {
+    match login_int(secrets.clone()).await {
         Ok(_) => true,
         Err(num) => {
             eprintln!("{:?}", num);
-            false
+            if let Err(_) = login_int(secrets.clone()).await {
+                match login_int(secrets).await {
+                    Ok(_) => return true,
+                    Err(_) => return false,
+                }
+            }
+            return false;
         }
     }
 }
-async fn login_int(
-    secrets: impl Future<Output = Option<crate::get_pass::Secret>>,
-) -> Result<(), WebDriverError> {
+async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDriverError> {
     let (web_driver, mut chrome_driver) = crate::setup_chrome_driver::get_tools(true).await;
     if let Ok(driver) = web_driver {
         driver
@@ -20,7 +22,7 @@ async fn login_int(
             .await?;
         if let Ok(title) = driver.title().await {
             if title == "Fortigate :: Login" {
-                let secrets = match secrets.await {
+                let secrets = match secrets {
                     Some(some) => some,
                     None => {
                         eprintln!("Unable to accure secrets");
@@ -43,6 +45,11 @@ async fn login_int(
         }
     } else {
         eprintln!("Driver Failed");
+        match chrome_driver.kill() {
+            Ok(_) => (),
+            Err(num) => eprintln!("{:?}", num),
+        }
+        return Err(WebDriverError::CustomError("Driver Failed!".to_string()));
     }
 
     match chrome_driver.kill() {
