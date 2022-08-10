@@ -11,9 +11,12 @@ pub fn chck_warp() -> bool {
     ssl_opts.no_revoke(true);
     ssl_opts.allow_beast(true);
     handle.ssl_options(&ssl_opts).unwrap();
-    handle
+    if handle
         .url("https://www.cloudflare.com/cdn-cgi/trace")
-        .unwrap();
+        .is_err()
+    {
+        return false;
+    }
     {
         let mut transfer = handle.transfer();
         if transfer
@@ -21,9 +24,11 @@ pub fn chck_warp() -> bool {
                 data.extend_from_slice(new_data);
                 Ok(new_data.len())
             })
-            .err().is_some() {
-                return false;
-            }
+            .err()
+            .is_some()
+        {
+            return false;
+        }
         if transfer.perform().err().is_some() {
             return false;
         }

@@ -1,6 +1,8 @@
 use clap::Parser;
 
+///Automatically log in to iiitdmk's fortigate login portal
 #[derive(Parser, Default, Debug)]
+#[clap(author, version, about)]
 pub struct Cli {
     //Path to password
     #[clap(
