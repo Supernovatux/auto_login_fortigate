@@ -22,4 +22,9 @@ strip = true
 thirtyfour="*"
 tokio = { version = "*", features = ["full"] }
 curl = "*"
-clap = { version = "3.2.16", features = ["derive"] }
+clap = { version = "*", features = ["derive"] }
+log = "*"
+env_logger = "*"
+cached = "*"
+simple_logger = "*"
+clap-verbosity-flag = "*"

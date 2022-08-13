@@ -43,10 +43,16 @@ pub fn chck_warp() -> bool {
     }
 }
 pub fn warpctl(mode: WarpModes) {
-    std::process::Command::new("warp-cli")
+    let out = std::process::Command::new("warp-cli")
         .arg(mode)
+        .stdout(std::process::Stdio::piped())
         .output()
         .unwrap();
+    log::trace!(
+        "stdout:- \n{:?}\n stderr:- \n{:?}",
+        String::from_utf8(out.stdout),
+        String::from_utf8(out.stderr)
+    );
 }
 impl AsRef<OsStr> for WarpModes {
     fn as_ref(&self) -> &OsStr {

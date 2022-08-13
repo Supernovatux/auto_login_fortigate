@@ -1,9 +1,12 @@
+use log::{error};
 use thirtyfour::prelude::*;
+
+use crate::setup_chrome_driver;
 pub async fn login(secrets: Option<crate::get_pass::Secret>) -> bool {
     match login_int(secrets.clone()).await {
         Ok(_) => true,
         Err(num) => {
-            eprintln!("{:?}", num);
+            error!("{:?}", num);
             if let Err(_) = login_int(secrets.clone()).await {
                 match login_int(secrets).await {
                     Ok(_) => return true,
@@ -25,13 +28,13 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
                 let secrets = match secrets {
                     Some(some) => some,
                     None => {
-                        eprintln!("Unable to accure secrets");
+                        log::error!("Unable to accure secrets");
                         return Err(WebDriverError::CustomError(
                             "Accuing secrets failed".to_string(),
                         ));
                     }
                 };
-                println!("good {}", title);
+                log::info!("good {}", title);
                 let user_f = driver.find(By::Name("username")).await?;
                 user_f.send_keys(secrets.get_username()).await?;
                 let pass_f = driver.find(By::Name("password")).await?;
@@ -40,21 +43,14 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
                 but_f.click().await?;
                 driver.quit().await?;
             } else {
-                println!("Already logged in!");
+                log::info!("Already logged in!");
             }
         }
     } else {
-        eprintln!("Driver Failed");
-        match chrome_driver.kill() {
-            Ok(_) => (),
-            Err(num) => eprintln!("{:?}", num),
-        }
+        error!("Driver Failed");
+        setup_chrome_driver::kill_chrome(&mut chrome_driver).await;
         return Err(WebDriverError::CustomError("Driver Failed!".to_string()));
     }
-
-    match chrome_driver.kill() {
-        Ok(_) => (),
-        Err(num) => eprintln!("{:?}", num),
-    }
+    setup_chrome_driver::kill_chrome(&mut chrome_driver).await;
     Ok(())
 }
