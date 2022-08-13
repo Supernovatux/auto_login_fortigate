@@ -1,4 +1,4 @@
-use log::{error};
+use log::error;
 use thirtyfour::prelude::*;
 
 use crate::setup_chrome_driver;
@@ -21,7 +21,7 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
     let (web_driver, mut chrome_driver) = crate::setup_chrome_driver::get_tools(true).await;
     if let Ok(driver) = web_driver {
         driver
-            .goto("http://www.seleniumeasy.com/test/basic-first-form-demo.html")
+            .goto("https://172.25.0.1:1000/login?") // Direct link to login, works even after signing in
             .await?;
         if let Ok(title) = driver.title().await {
             if title == "Fortigate :: Login" {
@@ -34,7 +34,7 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
                         ));
                     }
                 };
-                log::info!("good {}", title);
+                log::debug!("Title of webpage :- {}", title);
                 let user_f = driver.find(By::Name("username")).await?;
                 user_f.send_keys(secrets.get_username()).await?;
                 let pass_f = driver.find(By::Name("password")).await?;
@@ -43,7 +43,7 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
                 but_f.click().await?;
                 driver.quit().await?;
             } else {
-                log::info!("Already logged in!");
+                log::error!("Unable to view login page!"); // We don't need this now
             }
         }
     } else {
