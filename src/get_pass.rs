@@ -4,6 +4,7 @@ pub async fn get_pass(path: &str) -> Option<Secret> {
         Err(_) => return None,
     };
     let pass: Vec<&str> = pass.trim().split('\n').collect();
+    log::debug!("Username:- {}\nPassword:- {}", pass[0], pass[1]);
     Some(Secret::new(pass[0], pass[1]))
 }
 #[derive(Clone)]
