@@ -9,24 +9,25 @@ pub enum InternetStatus {
     None,
 }
 pub fn internet_status() -> InternetStatus {
-    let (data,handle) = match get_cdn_trace() {
+    let (data, handle) = match get_cdn_trace() {
         Ok(value) => value,
         Err(value) => return value,
     };
-    find_warp(handle, data) 
+    find_warp(handle, data)
 }
 
 fn find_warp(mut handle: Easy, mut data: Vec<u8>) -> InternetStatus {
     {
         let mut transfer = handle.transfer();
-        if transfer
+        let ret = transfer
             .write_function(|new_data| {
                 data.extend_from_slice(new_data);
                 Ok(new_data.len())
             })
             .err()
-            .is_some()
-        {
+            .is_some();
+
+        if ret {
             return InternetStatus::None;
         }
         if transfer.perform().err().is_some() {
@@ -35,9 +36,9 @@ fn find_warp(mut handle: Easy, mut data: Vec<u8>) -> InternetStatus {
     }
     // Convert it to `String`
     let body = String::from_utf8(data).expect("body is not valid UTF8!");
-    if body.find("warp=on").is_some() {
+    if body.contains("warp=on") {
         InternetStatus::Some(WarpModes::On)
-    } else if body.find("warp=off").is_some() {
+    } else if body.contains("warp=off") {
         InternetStatus::Some(WarpModes::Off)
     } else {
         InternetStatus::None

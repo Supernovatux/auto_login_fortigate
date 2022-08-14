@@ -1,19 +1,25 @@
+use crate::setup_chrome_driver;
 use log::error;
 use thirtyfour::prelude::*;
 
-use crate::setup_chrome_driver;
+///Logs the user into iiitdms's captive portal
+///
+/// # Arguments
+///
+/// * `secrets` - [Option] which contains a [crate::get_pass::Secret]
+///
 pub async fn login(secrets: Option<crate::get_pass::Secret>) -> bool {
     match login_int(secrets.clone()).await {
         Ok(_) => true,
         Err(num) => {
             error!("{:?}", num);
-            if let Err(_) = login_int(secrets.clone()).await {
+            if login_int(secrets.clone()).await.is_err() {
                 match login_int(secrets).await {
                     Ok(_) => return true,
                     Err(_) => return false,
                 }
             }
-            return false;
+            false
         }
     }
 }
