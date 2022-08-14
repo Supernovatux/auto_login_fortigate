@@ -1,4 +1,4 @@
-use log::{error, warn};
+use log::{error};
 use thirtyfour::prelude::*;
 
 use crate::setup_chrome_driver;
@@ -48,16 +48,9 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
         }
     } else {
         error!("Driver Failed");
-        match chrome_driver.kill() {
-            Ok(_) => (),
-            Err(num) => warn!("{:?}", num),
-        }
+        setup_chrome_driver::kill_chrome(&mut chrome_driver).await;
         return Err(WebDriverError::CustomError("Driver Failed!".to_string()));
     }
     setup_chrome_driver::kill_chrome(&mut chrome_driver).await;
-    match chrome_driver.kill() {
-        Ok(_) => (),
-        Err(num) => warn!("{:?}", num),
-    }
     Ok(())
 }
