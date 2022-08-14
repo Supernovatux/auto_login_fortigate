@@ -19,6 +19,12 @@ pub async fn get_tools(headless: bool) -> (Result<WebDriver, WebDriverError>, Ch
         chromedriver,
     )
 }
+///Kills chromedriver also writed stdout and stderr to [log::debug]
+///
+/// # Arguments
+///
+/// * `process` - Takes in [Child] of the running chrome driver
+///
 pub async fn kill_chrome(process: &mut Child) -> bool {
     let out = get_buff_read(process).await;
     let mut handles = Vec::new();

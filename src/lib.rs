@@ -6,6 +6,7 @@ pub mod login;
 pub mod setup_chrome_driver;
 pub mod warp_control;
 
+/// Pauses the execution of the current thread till an enter is recieved;:w
 pub fn pause() {
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();

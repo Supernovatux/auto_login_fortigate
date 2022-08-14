@@ -1,13 +1,22 @@
 use curl::easy::{Easy, SslOpt};
 use std::ffi::OsStr;
+///Enum to represent the state of cloudflare warp
 pub enum WarpModes {
+    ///Warp is on
     On,
+    ///Warp is off
     Off,
 }
+
+///Enum to represent the state of internet connectivity
 pub enum InternetStatus {
+    ///Internet works.Contains a [WarpModes] to represent warp status
     Some(WarpModes),
+    ///Internet not there or is behind a captive portal
     None,
 }
+
+///A function which returns [InternetStatus]
 pub fn internet_status() -> InternetStatus {
     let (data, handle) = match get_cdn_trace() {
         Ok(value) => value,
@@ -60,6 +69,12 @@ fn get_cdn_trace() -> Result<(Vec<u8>, Easy), InternetStatus> {
     }
     Ok((data, handle))
 }
+
+///A function to turn warp on and off
+///
+/// # Arguments
+///
+/// * `mode` - [WarpModes] to turn warp on or off   
 pub fn warpctl(mode: WarpModes) {
     let out = std::process::Command::new("warp-cli")
         .arg(mode)
