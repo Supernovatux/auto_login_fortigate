@@ -21,7 +21,7 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
     let (web_driver, mut chrome_driver) = crate::setup_chrome_driver::get_tools(true).await;
     if let Ok(driver) = web_driver {
         driver
-            .goto("http://www.seleniumeasy.com/test/basic-first-form-demo.html")
+            .goto("https://172.25.0.1:1000/login?")  // Direct link to login, works even after signing in
             .await?;
         if let Ok(title) = driver.title().await {
             if title == "Fortigate :: Login" {
@@ -43,7 +43,7 @@ async fn login_int(secrets: Option<crate::get_pass::Secret>) -> Result<(), WebDr
                 but_f.click().await?;
                 driver.quit().await?;
             } else {
-                log::info!("Already logged in!");
+                log::info!("Already logged in!");  // We don't need this now
             }
         }
     } else {
