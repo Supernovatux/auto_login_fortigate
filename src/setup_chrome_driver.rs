@@ -22,8 +22,8 @@ pub async fn get_tools(headless: bool) -> (Result<WebDriver, WebDriverError>, Ch
 pub async fn kill_chrome(process: &mut Child) -> bool {
     let out = get_buff_read(process).await;
     let mut handles = Vec::new();
-    handles.push(tokio::spawn(async move {write_buf(out.0).await}));
-    handles.push(tokio::spawn(async move {write_buf(out.1).await}));
+    handles.push(tokio::spawn(async move { write_buf(out.0).await }));
+    handles.push(tokio::spawn(async move { write_buf(out.1).await }));
     tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
     for handle in handles {
         handle.abort();

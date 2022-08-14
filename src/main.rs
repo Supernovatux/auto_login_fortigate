@@ -1,4 +1,7 @@
-use auto_login::cli_parser;
+use auto_login::{
+    cli_parser,
+    warp_control::{InternetStatus, WarpModes, self},
+};
 use log::info;
 use thirtyfour::prelude::*;
 use tokio::join;
@@ -9,12 +12,22 @@ async fn main() -> WebDriverResult<()> {
     info!("Starting with log_lev:- {:?}", log_lev);
     info!("Path for password:- {}", path);
     let mut web_status = true;
-    if !auto_login::warp_control::chck_warp() {
-        auto_login::warp_control::warpctl(auto_login::warp_control::WarpModes::Stop);
-        web_status = auto_login::login::login(auto_login::get_pass::get_pass(&path).await).await;
-        auto_login::warp_control::warpctl(auto_login::warp_control::WarpModes::Start);
-    } else {
-        log::info!("Logged in and connected to warp");
+    match warp_control::internet_status() {
+        InternetStatus::Some(warp_status) => {
+            match warp_status {
+                WarpModes::On => log::info!("Logged in and connected to warp"),
+                WarpModes::Off => {
+                    auto_login::warp_control::warpctl(WarpModes::On);
+                    log::info!("Logged in and connected to warp(1)");
+                }
+            }
+        }
+        InternetStatus::None => {
+            warp_control::warpctl(auto_login::warp_control::WarpModes::Off);
+            web_status = auto_login::login::login(auto_login::get_pass::get_pass(&path).await).await;
+            warp_control::warpctl(auto_login::warp_control::WarpModes::On);
+            log::info!("Logged in and connected to warp");
+        }
     }
     if web_status {
         Ok(())
